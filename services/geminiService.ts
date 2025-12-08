@@ -18,16 +18,17 @@ const getAPIKey = () => {
 
 export const generateTeamAnalysis = async (team: UserTeam): Promise<string> => {
   const apiKey = getAPIKey();
-  if (!apiKey) return "未配置 API Key，无法使用 AI 功能。";
+  if (!apiKey) return "未配置 API Key，无法使用 AI 功能。请在部署环境配置 API_KEY。";
 
   // Dynamic import to prevent app crash if the SDK module fails to load on startup
   let GoogleGenAI;
   try {
+      // @ts-ignore
       const module = await import("@google/genai");
       GoogleGenAI = module.GoogleGenAI;
   } catch (error) {
       console.error("Failed to load Google GenAI SDK:", error);
-      return "加载 AI 组件失败，请检查网络连接或浏览器兼容性。";
+      return "加载 AI 组件失败。请检查网络连接，或确认浏览器支持 ES Modules。";
   }
 
   const ai = new GoogleGenAI({ apiKey });
