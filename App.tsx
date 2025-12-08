@@ -13,6 +13,9 @@ import { generateTeamAnalysis } from './services/geminiService';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<'setup' | 'building' | 'active'>('setup');
+  const [setupStep, setSetupStep] = useState<'naming' | 'formation'>('naming'); // New state for setup steps
+  const [inputTeamName, setInputTeamName] = useState('');
+  
   const [activeTab, setActiveTab] = useState<'pitch' | 'fixtures' | 'leagues'>('pitch');
   const [gameweek, setGameweek] = useState<Gameweek>({ id: 1, name: '第 1 轮', deadline: '周五 19:00', isCurrent: true });
   const [players, setPlayers] = useState<Player[]>(MOCK_PLAYERS);
@@ -60,6 +63,13 @@ const App: React.FC = () => {
       }
     });
     setTotalPoints(pts);
+  };
+
+  const handleNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputTeamName.trim()) return;
+    setMyTeam(prev => ({ ...prev, name: inputTeamName }));
+    setSetupStep('formation');
   };
 
   const handleSelectFormation = (fmt: string) => {
@@ -134,20 +144,52 @@ const App: React.FC = () => {
   if (appState === 'setup') {
       return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-2xl w-full text-center shadow-2xl">
+            <div className="bg-white rounded-2xl p-8 max-w-2xl w-full text-center shadow-2xl animate-fade-in-up">
                 <h1 className="text-3xl font-bold text-[#37003c] mb-2">欢迎来到中超 Fantasy '26</h1>
-                <p className="text-gray-500 mb-8">请选择你的初始阵型。</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {Object.keys(FORMATION_CONFIGS).map(fmt => (
-                        <button 
-                            key={fmt}
-                            onClick={() => handleSelectFormation(fmt)}
-                            className="p-6 border-2 border-slate-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition flex flex-col items-center gap-2 group"
-                        >
-                            <span className="font-bold text-2xl text-slate-700 group-hover:text-purple-700">{fmt}</span>
-                        </button>
-                    ))}
-                </div>
+                
+                {setupStep === 'naming' ? (
+                  <div className="mt-8">
+                    <p className="text-gray-500 mb-6">首先，给你的球队起一个响亮的名字。</p>
+                    <form onSubmit={handleNameSubmit} className="max-w-xs mx-auto flex flex-col gap-4">
+                      <input 
+                        type="text" 
+                        value={inputTeamName}
+                        onChange={(e) => setInputTeamName(e.target.value)}
+                        placeholder="例如：广州无敌队"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-purple-600 focus:outline-none text-lg text-center font-bold text-slate-800 placeholder-slate-300"
+                        autoFocus
+                      />
+                      <button 
+                        type="submit"
+                        disabled={!inputTeamName.trim()}
+                        className="w-full bg-green-500 hover:bg-green-600 disabled:bg-slate-300 text-white font-bold py-3 rounded-xl transition shadow-lg transform active:scale-95"
+                      >
+                        下一步
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="mt-6 animate-fade-in">
+                    <p className="text-gray-500 mb-8">请选择你的初始阵型。</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {Object.keys(FORMATION_CONFIGS).map(fmt => (
+                            <button 
+                                key={fmt}
+                                onClick={() => handleSelectFormation(fmt)}
+                                className="p-6 border-2 border-slate-200 rounded-xl hover:border-purple-600 hover:bg-purple-50 transition flex flex-col items-center gap-2 group"
+                            >
+                                <span className="font-bold text-2xl text-slate-700 group-hover:text-purple-700">{fmt}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <button 
+                      onClick={() => setSetupStep('naming')}
+                      className="mt-6 text-sm text-slate-400 hover:text-slate-600 underline"
+                    >
+                      返回修改队名
+                    </button>
+                  </div>
+                )}
             </div>
         </div>
       );
@@ -162,7 +204,10 @@ const App: React.FC = () => {
           <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
              <div className="flex items-center gap-3">
                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-yellow-400 rounded-full flex items-center justify-center font-bold text-sm shadow-inner">CSL</div>
-               <h1 className="font-bold text-lg tracking-tight hidden sm:block">中超 Fantasy '26</h1>
+               <div className="hidden sm:flex flex-col">
+                  <span className="font-bold text-lg tracking-tight leading-none">中超 Fantasy</span>
+                  <span className="text-[10px] text-purple-200 leading-none">{myTeam.name}</span>
+               </div>
              </div>
              
              {appState === 'building' ? (
