@@ -15,12 +15,12 @@ export const getClubById = (id: number): Club | undefined => {
 const MOCK_LEAGUES: League[] = [
   {
     id: 'league-global',
-    name: 'Global CSL League',
+    name: '中超全球总联赛',
     code: 'GLOBAL',
     members: [
-      { userId: 'bot-1', teamName: 'Beijing Galaxy', managerName: 'Bot 1', gameweekPoints: 45, totalPoints: 120, rank: 1 },
-      { userId: 'bot-2', teamName: 'Shanghai Stars', managerName: 'Bot 2', gameweekPoints: 32, totalPoints: 105, rank: 2 },
-      { userId: 'bot-3', teamName: 'Sichuan Spicy', managerName: 'Bot 3', gameweekPoints: 58, totalPoints: 98, rank: 3 },
+      { userId: 'bot-1', teamName: '北京银河队', managerName: '机器 1 号', gameweekPoints: 45, totalPoints: 120, rank: 1 },
+      { userId: 'bot-2', teamName: '上海星辰队', managerName: '机器 2 号', gameweekPoints: 32, totalPoints: 105, rank: 2 },
+      { userId: 'bot-3', teamName: '四川火辣队', managerName: '机器 3 号', gameweekPoints: 58, totalPoints: 98, rank: 3 },
     ]
   }
 ];
@@ -68,7 +68,6 @@ export const getLeagueDetails = (leagueId: string): League | undefined => {
 // --- Fixtures & Simulation ---
 
 export const generateFixtures = (gameweekId: number): Match[] => {
-  // Simple round-robin pair generator for demo
   const shuffledClubs = [...CLUBS].sort(() => 0.5 - Math.random());
   const matches: Match[] = [];
   
@@ -86,7 +85,6 @@ export const generateFixtures = (gameweekId: number): Match[] => {
   return matches;
 };
 
-// Simulate a match and distribute points to players
 export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]): { updatedPlayers: Player[], updatedFixtures: Match[] } => {
   const updatedPlayersMap = new Map<number, Player>(players.map(p => [p.id, p]));
   const updatedFixtures: Match[] = [];
@@ -97,8 +95,6 @@ export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]
         continue;
     }
 
-    // 1. Simulate Score
-    // Weighted slightly by home advantage
     const homeGoals = Math.floor(Math.random() * 4); // 0-3
     const awayGoals = Math.floor(Math.random() * 3); // 0-2
     
@@ -107,15 +103,11 @@ export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]
     const homePlayers = players.filter(p => p.clubId === match.homeTeamId);
     const awayPlayers = players.filter(p => p.clubId === match.awayTeamId);
 
-    // Helper to add goals
     const assignGoals = (count: number, teamPlayers: Player[]) => {
       for (let k = 0; k < count; k++) {
-         // FWDs have higher chance to score
          const scorer = teamPlayers[Math.floor(Math.random() * teamPlayers.length)]; 
-         // Simplified: Any player can score, but let's assume valid lineup not checked here
          events.push({ playerId: scorer.id, type: 'goal', minute: Math.floor(Math.random() * 90) + 1 });
          
-         // 60% chance of assist
          if (Math.random() > 0.4) {
             const assister = teamPlayers[Math.floor(Math.random() * teamPlayers.length)];
             if (assister.id !== scorer.id) {
@@ -128,11 +120,9 @@ export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]
     assignGoals(homeGoals, homePlayers);
     assignGoals(awayGoals, awayPlayers);
 
-    // 2. Update Stats for Players in this Match
     [...homePlayers, ...awayPlayers].forEach(p => {
         const stats = { ...p.stats };
         
-        // Reset GW stats
         stats.minutes = 0;
         stats.goals = 0;
         stats.assists = 0;
@@ -141,16 +131,13 @@ export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]
         stats.yellowCards = 0;
         stats.totalPoints = 0;
 
-        // Did they play? (Simulate lineup)
-        const played = Math.random() > 0.3; // 70% chance to play
+        const played = Math.random() > 0.3; 
         if (played) {
             stats.minutes = Math.random() > 0.1 ? 90 : Math.floor(Math.random() * 90);
             
-            // Goals / Assists from events
             stats.goals = events.filter(e => e.playerId === p.id && e.type === 'goal').length;
             stats.assists = events.filter(e => e.playerId === p.id && e.type === 'assist').length;
             
-            // Clean Sheets & Conceded
             if (p.clubId === match.homeTeamId) {
                 stats.goalsConceded = awayGoals;
                 if (awayGoals === 0 && (p.position === Position.GK || p.position === Position.DEF || p.position === Position.MID)) {
@@ -163,14 +150,11 @@ export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]
                 }
             }
             
-            // Cards
             if (Math.random() > 0.9) stats.yellowCards = 1;
 
-            // Calc Points
-            const tempPlayer = { ...p, stats }; // Create temp to calc points
+            const tempPlayer = { ...p, stats }; 
             stats.totalPoints = calculatePlayerPoints(tempPlayer);
             
-            // Update map
             updatedPlayersMap.set(p.id, { ...p, stats, totalSeasonPoints: p.totalSeasonPoints + stats.totalPoints });
         } else {
              updatedPlayersMap.set(p.id, { ...p, stats });
@@ -186,8 +170,6 @@ export const simulateGameweekWithMatches = (players: Player[], fixtures: Match[]
     });
   }
 
-  // Ensure players not in active fixtures (if any) are also reset or handled
-  // For now, we assume generateFixtures covers everyone or we just iterate map
   return {
     updatedPlayers: Array.from(updatedPlayersMap.values()),
     updatedFixtures
@@ -198,43 +180,35 @@ export const calculatePlayerPoints = (player: Player): number => {
   const s = player.stats;
   let points = 0;
 
-  // Minutes
   if (s.minutes >= 60) points += SCORING_RULES.PLAYING_60_MINS;
   else if (s.minutes > 0) points += SCORING_RULES.PLAYING_LESS_60;
 
-  // Goals
   if (player.position === Position.GK) points += s.goals * SCORING_RULES.GOAL_GK;
   if (player.position === Position.DEF) points += s.goals * SCORING_RULES.GOAL_DEF;
   if (player.position === Position.MID) points += s.goals * SCORING_RULES.GOAL_MID;
   if (player.position === Position.FWD) points += s.goals * SCORING_RULES.GOAL_FWD;
 
-  // Assists
   points += s.assists * SCORING_RULES.ASSIST;
 
-  // Clean Sheets
   if (s.cleanSheets > 0) {
     if (player.position === Position.GK) points += SCORING_RULES.CLEAN_SHEET_GK;
     if (player.position === Position.DEF) points += SCORING_RULES.CLEAN_SHEET_DEF;
     if (player.position === Position.MID) points += SCORING_RULES.CLEAN_SHEET_MID;
   }
 
-  // Saves
   points += Math.floor(s.saves / 3) * SCORING_RULES.SAVE_EVERY_3;
   points += s.penaltiesSaved * SCORING_RULES.PENALTY_SAVE;
 
-  // Negative
   points += Math.floor(s.goalsConceded / 2) * SCORING_RULES.TWO_GOALS_CONCEDED;
   points += s.yellowCards * SCORING_RULES.YELLOW_CARD;
   points += s.redCards * SCORING_RULES.RED_CARD;
   points += s.ownGoals * SCORING_RULES.OWN_GOAL;
 
-  // Bonus
   points += s.bonus;
 
   return points;
 };
 
-// Old helpers preserved
 export const generateEmptySquad = (formation: string): SquadPlayer[] => {
   const config = FORMATION_CONFIGS[formation] || FORMATION_CONFIGS['4-4-2'];
   const squad: SquadPlayer[] = [];

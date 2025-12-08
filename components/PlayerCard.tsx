@@ -1,6 +1,7 @@
 import React from 'react';
 import { Player, SquadPlayer } from '../types';
 import { getClubById } from '../services/gameService';
+import { POSITION_NAMES } from '../constants';
 
 interface PlayerCardProps {
   player: Player | undefined; // Undefined means empty slot
@@ -12,6 +13,7 @@ interface PlayerCardProps {
 const PlayerCard: React.FC<PlayerCardProps> = ({ player, squadDetails, onClick, showPoints = false }) => {
   const isCaptain = squadDetails.isCaptain;
   const isVice = squadDetails.isViceCaptain;
+  const posName = POSITION_NAMES[squadDetails.position];
 
   // Empty Slot State
   if (!player) {
@@ -24,7 +26,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, squadDetails, onClick, 
           <span className="text-white font-bold text-xl drop-shadow-md">+</span>
         </div>
         <div className="bg-yellow-500/90 text-white rounded-sm text-[10px] py-0.5 px-2 font-bold shadow-sm uppercase tracking-wider">
-          {squadDetails.position}
+          {posName}
         </div>
       </div>
     );
@@ -64,7 +66,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, squadDetails, onClick, 
         </div>
         {showPoints && (
           <div className="bg-green-100 text-green-800 font-bold border-t border-green-200 mt-0.5">
-            {player.stats.totalPoints} pts
+            {player.stats.totalPoints} 分
           </div>
         )}
       </div>

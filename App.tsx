@@ -12,17 +12,15 @@ import { simulateGameweekWithMatches, generateFixtures, calculateTeamValue, gene
 import { generateTeamAnalysis } from './services/geminiService';
 
 const App: React.FC = () => {
-  // --- State ---
   const [appState, setAppState] = useState<'setup' | 'building' | 'active'>('setup');
   const [activeTab, setActiveTab] = useState<'pitch' | 'fixtures' | 'leagues'>('pitch');
-  const [gameweek, setGameweek] = useState<Gameweek>({ id: 1, name: 'GW 1', deadline: 'Fri 19:00', isCurrent: true });
+  const [gameweek, setGameweek] = useState<Gameweek>({ id: 1, name: '第 1 轮', deadline: '周五 19:00', isCurrent: true });
   const [players, setPlayers] = useState<Player[]>(MOCK_PLAYERS);
   const [matches, setMatches] = useState<Match[]>([]);
   
-  // Initialize with an empty team state
   const [myTeam, setMyTeam] = useState<UserTeam>({
     id: 'user-1',
-    name: 'Dragon FC 2026',
+    name: '中超梦之队 2026',
     budget: 100.0,
     transfersMade: 0,
     chipsUsed: [],
@@ -36,14 +34,11 @@ const App: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [totalPoints, setTotalPoints] = useState(0);
 
-  // Player Picker State
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickingForSlotId, setPickingForSlotId] = useState<string | null>(null);
   const [pickingForPosition, setPickingForPosition] = useState<Position>(Position.GK);
 
-  // --- Effects ---
   useEffect(() => {
-    // Generate initial fixtures for GW1
     const fixtures = generateFixtures(1);
     setMatches(fixtures);
   }, []);
@@ -56,7 +51,6 @@ const App: React.FC = () => {
 
   const recalcTotalPoints = () => {
     let pts = 0;
-    // Only count starters for total points
     myTeam.squad.filter(s => s.isStarter && s.playerId).forEach(s => {
       const p = players.find(pl => pl.id === s.playerId);
       if (p) {
@@ -68,31 +62,25 @@ const App: React.FC = () => {
     setTotalPoints(pts);
   };
 
-  // --- Handlers ---
-
-  // Phase 1: Formation Selection
   const handleSelectFormation = (fmt: string) => {
     const emptySquad = generateEmptySquad(fmt);
     setMyTeam(prev => ({ ...prev, formation: fmt, squad: emptySquad }));
     setAppState('building');
   };
 
-  // Phase 2: Player Selection
   const handleSlotClick = (slot: SquadPlayer, player: Player | undefined) => {
-    // In setup mode, always open picker
     if (appState === 'building' || !player) {
       setPickingForSlotId(slot.id);
       setPickingForPosition(slot.position);
       setPickerOpen(true);
     } else {
-        // In active mode, showing details
-        alert(`Player: ${player.webName}\nPrice: £${player.price}m\nPoints: ${player.stats.totalPoints}`);
+        alert(`球员: ${player.webName}\n身价: £${player.price}m\n本轮得分: ${player.stats.totalPoints}`);
     }
   };
 
   const handlePlayerSelect = (player: Player) => {
     if (myTeam.squad.some(s => s.playerId === player.id)) {
-        alert("Player already in squad!");
+        alert("该球员已在阵容中！");
         return;
     }
 
@@ -104,7 +92,6 @@ const App: React.FC = () => {
             return slot;
         });
 
-        // Auto-assign Captain
         const hasCaptain = newSquad.some(s => s.isCaptain);
         if (!hasCaptain && newSquad.some(s => s.playerId)) {
            const firstPlayer = newSquad.find(s => s.playerId);
@@ -121,19 +108,17 @@ const App: React.FC = () => {
 
   const handleFinishBuilding = () => {
     if (!isSquadComplete(myTeam.squad)) {
-        alert("Please fill all 15 slots before starting the season.");
+        alert("请选满 15 名球员后再开始赛季。");
         return;
     }
     setAppState('active');
   };
 
-  // Phase 3: Game Loop
   const handleRunSimulation = useCallback(() => {
-    // Determine which matches haven't been played
     const { updatedPlayers, updatedFixtures } = simulateGameweekWithMatches(players, matches);
     setPlayers(updatedPlayers);
     setMatches(updatedFixtures);
-    setActiveTab('fixtures'); // Switch to fixtures to show results
+    setActiveTab('fixtures'); 
   }, [players, matches]);
 
   const handleAskAI = async () => {
@@ -146,14 +131,12 @@ const App: React.FC = () => {
     setAiLoading(false);
   };
 
-  // --- Render ---
-
   if (appState === 'setup') {
       return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl p-8 max-w-2xl w-full text-center shadow-2xl">
-                <h1 className="text-3xl font-bold text-[#37003c] mb-2">Welcome to CSL Fantasy '26</h1>
-                <p className="text-gray-500 mb-8">Start by choosing your tactical formation.</p>
+                <h1 className="text-3xl font-bold text-[#37003c] mb-2">欢迎来到中超 Fantasy '26</h1>
+                <p className="text-gray-500 mb-8">请选择你的初始阵型。</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {Object.keys(FORMATION_CONFIGS).map(fmt => (
                         <button 
@@ -179,13 +162,13 @@ const App: React.FC = () => {
           <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
              <div className="flex items-center gap-3">
                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-yellow-400 rounded-full flex items-center justify-center font-bold text-sm shadow-inner">CSL</div>
-               <h1 className="font-bold text-lg tracking-tight hidden sm:block">CSL Fantasy '26</h1>
+               <h1 className="font-bold text-lg tracking-tight hidden sm:block">中超 Fantasy '26</h1>
              </div>
              
              {appState === 'building' ? (
                  <div className="flex items-center gap-4">
                      <div className="text-right">
-                         <div className="text-xs text-purple-200">Budget</div>
+                         <div className="text-xs text-purple-200">预算</div>
                          <div className={`font-bold ${remainingBudget < 0 ? 'text-red-400' : 'text-white'}`}>£{remainingBudget.toFixed(1)}m</div>
                      </div>
                      <button 
@@ -193,7 +176,7 @@ const App: React.FC = () => {
                         disabled={!isSquadComplete(myTeam.squad) || remainingBudget < 0}
                         className="bg-green-500 disabled:bg-gray-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition"
                      >
-                        Confirm Squad
+                        确认阵容
                      </button>
                  </div>
              ) : (
@@ -202,7 +185,7 @@ const App: React.FC = () => {
                         <span className="text-white font-bold">{gameweek.name}</span>
                     </div>
                     <div className="bg-white/10 px-3 py-1 rounded-full border border-white/20">
-                        PTS: <span className="font-bold text-yellow-400">{totalPoints}</span>
+                        总分: <span className="font-bold text-yellow-400">{totalPoints}</span>
                     </div>
                 </div>
              )}
@@ -214,9 +197,9 @@ const App: React.FC = () => {
             <div className="bg-white border-b border-slate-200 mb-6">
             <div className="max-w-4xl mx-auto flex">
                 {[
-                { id: 'pitch', label: 'My Team' },
-                { id: 'fixtures', label: 'Match Center' },
-                { id: 'leagues', label: 'Leagues' }
+                { id: 'pitch', label: '我的阵容' },
+                { id: 'fixtures', label: '比赛中心' },
+                { id: 'leagues', label: '联赛榜单' }
                 ].map(tab => (
                 <button
                     key={tab.id}
@@ -239,7 +222,7 @@ const App: React.FC = () => {
           {appState === 'active' && activeTab === 'pitch' && (
             <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <div className="flex flex-col">
-                <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">Formation</span>
+                <span className="text-xs text-slate-500 uppercase font-bold tracking-wider">当前阵型</span>
                 <span className="font-bold text-xl text-slate-800">{myTeam.formation}</span>
                 </div>
                 
@@ -249,13 +232,13 @@ const App: React.FC = () => {
                     disabled={matches.every(m => m.isFinished)}
                     className="bg-green-600 disabled:bg-gray-400 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition active:scale-95 flex items-center gap-2"
                     >
-                    {matches.every(m => m.isFinished) ? 'GW Finished' : 'Simulate GW'}
+                    {matches.every(m => m.isFinished) ? '本轮已完赛' : '模拟本轮'}
                     </button>
                     <button 
                     onClick={handleAskAI}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition active:scale-95 flex items-center gap-2"
                     >
-                    AI Scout
+                    AI 球探
                     </button>
                 </div>
             </div>
@@ -263,8 +246,8 @@ const App: React.FC = () => {
 
           {appState === 'building' && (
               <div className="text-center mb-6">
-                  <h2 className="text-xl font-bold text-slate-800">Build Your Squad</h2>
-                  <p className="text-slate-500 text-sm">Tap on the empty shirts to sign players.</p>
+                  <h2 className="text-xl font-bold text-slate-800">组建你的球队</h2>
+                  <p className="text-slate-500 text-sm">点击场上的空球衣以签入球员。</p>
               </div>
           )}
 
@@ -288,7 +271,6 @@ const App: React.FC = () => {
 
         </main>
 
-        {/* Modals */}
         <AIAnalysisModal 
           isOpen={aiModalOpen} 
           onClose={() => setAiModalOpen(false)} 

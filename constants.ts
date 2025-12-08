@@ -21,6 +21,13 @@ export const SCORING_RULES = {
   SAVE_EVERY_3: 1,
 };
 
+export const POSITION_NAMES: Record<Position, string> = {
+  [Position.GK]: '门将',
+  [Position.DEF]: '后卫',
+  [Position.MID]: '中场',
+  [Position.FWD]: '前锋',
+};
+
 export const FORMATION_CONFIGS: Record<string, FormationConfig> = {
   '4-4-2': { [Position.GK]: 1, [Position.DEF]: 4, [Position.MID]: 4, [Position.FWD]: 2 },
   '4-3-3': { [Position.GK]: 1, [Position.DEF]: 4, [Position.MID]: 3, [Position.FWD]: 3 },
@@ -32,22 +39,22 @@ export const FORMATION_CONFIGS: Record<string, FormationConfig> = {
 
 // Full 16 Team CSL Roster (2026 Projected)
 export const CLUBS: Club[] = [
-  { id: 1, name: '上海海港', shortName: 'SHP', primaryColor: '#D32F2F', secondaryColor: '#B71C1C' },
-  { id: 2, name: '上海申花', shortName: 'SHS', primaryColor: '#1976D2', secondaryColor: '#0D47A1' },
-  { id: 3, name: '成都蓉城', shortName: 'CDR', primaryColor: '#C62828', secondaryColor: '#FFFFFF' },
-  { id: 4, name: '北京国安', shortName: 'BJG', primaryColor: '#388E3C', secondaryColor: '#1B5E20' },
-  { id: 5, name: '山东泰山', shortName: 'SDT', primaryColor: '#E64A19', secondaryColor: '#FF5722' },
-  { id: 6, name: '天津津门虎', shortName: 'TJT', primaryColor: '#1565C0', secondaryColor: '#FFFFFF' },
-  { id: 7, name: '浙江队', shortName: 'ZHP', primaryColor: '#2E7D32', secondaryColor: '#81C784' },
-  { id: 8, name: '河南队', shortName: 'HEN', primaryColor: '#D32F2F', secondaryColor: '#1565C0' },
-  { id: 9, name: '长春亚泰', shortName: 'CCY', primaryColor: '#B71C1C', secondaryColor: '#FFCDD2' },
-  { id: 10, name: '青岛西海岸', shortName: 'QWC', primaryColor: '#FBC02D', secondaryColor: '#303F9F' },
-  { id: 11, name: '武汉三镇', shortName: 'WHT', primaryColor: '#1E88E5', secondaryColor: '#FFFFFF' },
-  { id: 12, name: '青岛海牛', shortName: 'QHN', primaryColor: '#F57F17', secondaryColor: '#000000' },
-  { id: 13, name: '沧州雄狮', shortName: 'CZM', primaryColor: '#0277BD', secondaryColor: '#FFFFFF' },
-  { id: 14, name: '深圳新鹏城', shortName: 'SZP', primaryColor: '#00BCD4', secondaryColor: '#FFFFFF' },
-  { id: 15, name: '梅州客家', shortName: 'MZH', primaryColor: '#C2185B', secondaryColor: '#FFFFFF' },
-  { id: 16, name: '大连英博', shortName: 'DLY', primaryColor: '#000000', secondaryColor: '#FFFFFF' }, // Promoted placeholder
+  { id: 1, name: '上海海港', shortName: '海港', primaryColor: '#D32F2F', secondaryColor: '#B71C1C' },
+  { id: 2, name: '上海申花', shortName: '申花', primaryColor: '#1976D2', secondaryColor: '#0D47A1' },
+  { id: 3, name: '成都蓉城', shortName: '蓉城', primaryColor: '#C62828', secondaryColor: '#FFFFFF' },
+  { id: 4, name: '北京国安', shortName: '国安', primaryColor: '#388E3C', secondaryColor: '#1B5E20' },
+  { id: 5, name: '山东泰山', shortName: '泰山', primaryColor: '#E64A19', secondaryColor: '#FF5722' },
+  { id: 6, name: '天津津门虎', shortName: '津门虎', primaryColor: '#1565C0', secondaryColor: '#FFFFFF' },
+  { id: 7, name: '浙江队', shortName: '浙江', primaryColor: '#2E7D32', secondaryColor: '#81C784' },
+  { id: 8, name: '河南队', shortName: '河南', primaryColor: '#D32F2F', secondaryColor: '#1565C0' },
+  { id: 9, name: '长春亚泰', shortName: '亚泰', primaryColor: '#B71C1C', secondaryColor: '#FFCDD2' },
+  { id: 10, name: '青岛西海岸', shortName: '西海岸', primaryColor: '#FBC02D', secondaryColor: '#303F9F' },
+  { id: 11, name: '武汉三镇', shortName: '三镇', primaryColor: '#1E88E5', secondaryColor: '#FFFFFF' },
+  { id: 12, name: '青岛海牛', shortName: '海牛', primaryColor: '#F57F17', secondaryColor: '#000000' },
+  { id: 13, name: '沧州雄狮', shortName: '雄狮', primaryColor: '#0277BD', secondaryColor: '#FFFFFF' },
+  { id: 14, name: '深圳新鹏城', shortName: '新鹏城', primaryColor: '#00BCD4', secondaryColor: '#FFFFFF' },
+  { id: 15, name: '梅州客家', shortName: '梅州', primaryColor: '#C2185B', secondaryColor: '#FFFFFF' },
+  { id: 16, name: '大连英博', shortName: '大连', primaryColor: '#000000', secondaryColor: '#FFFFFF' },
 ];
 
 // Helper to generate a player
@@ -111,7 +118,6 @@ const REAL_PLAYERS: Record<number, Array<{name: string, pos: Position, price: nu
     { name: '刘洋', pos: Position.DEF, price: 5.5 }, { name: '高准翼', pos: Position.DEF, price: 5.5 },
     { name: '泽卡', pos: Position.FWD, price: 8.5 }, { name: '李源一', pos: Position.MID, price: 6.0 }
   ]
-  // ... other clubs will get generic fillers + maybe 1 star
 };
 
 // Generate full roster for all 16 clubs
@@ -130,7 +136,8 @@ CLUBS.forEach(club => {
     while (counts[pos] < target) {
       counts[pos]++;
       const price = basePrice + (Math.random() * 1.5) - 0.5;
-      PLAYERS_DB.push(createPlayer(playerIdCounter++, `${club.shortName} ${pos} ${counts[pos]}`, pos, club.id, Number(price.toFixed(1))));
+      const posName = POSITION_NAMES[pos];
+      PLAYERS_DB.push(createPlayer(playerIdCounter++, `${club.shortName}${posName}${counts[pos]}`, pos, club.id, Number(price.toFixed(1))));
     }
   };
 

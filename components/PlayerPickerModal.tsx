@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Player, Position, Club } from '../types';
-import { CLUBS } from '../constants';
+import { CLUBS, POSITION_NAMES } from '../constants';
 
 interface PlayerPickerModalProps {
   isOpen: boolean;
@@ -17,17 +17,18 @@ const PlayerPickerModal: React.FC<PlayerPickerModalProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [clubFilter, setClubFilter] = useState<number | 'all'>('all');
 
-  // Filter players by position, availability (not implemented but could be here), and search
   const filteredPlayers = useMemo(() => {
     return players.filter(p => {
       const matchPos = p.position === position;
       const matchSearch = p.webName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchClub = clubFilter === 'all' || p.clubId === clubFilter;
       return matchPos && matchSearch && matchClub;
-    }).sort((a, b) => b.price - a.price); // Sort by price descending
+    }).sort((a, b) => b.price - a.price);
   }, [players, position, searchTerm, clubFilter]);
 
   if (!isOpen) return null;
+
+  const posName = POSITION_NAMES[position];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -35,8 +36,8 @@ const PlayerPickerModal: React.FC<PlayerPickerModalProps> = ({
         {/* Header */}
         <div className="bg-[#37003c] p-4 text-white flex justify-between items-center">
           <div>
-            <h2 className="font-bold text-lg">Select {position}</h2>
-            <p className="text-xs text-gray-300">Budget Remaining: £{currentBudget.toFixed(1)}m</p>
+            <h2 className="font-bold text-lg">选择 {posName}</h2>
+            <p className="text-xs text-gray-300">剩余预算: £{currentBudget.toFixed(1)}m</p>
           </div>
           <button onClick={onClose} className="hover:bg-white/20 rounded-full p-1">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -47,7 +48,7 @@ const PlayerPickerModal: React.FC<PlayerPickerModalProps> = ({
         <div className="p-3 bg-gray-50 border-b flex gap-2">
             <input 
               type="text" 
-              placeholder="Search name..." 
+              placeholder="搜索球员..." 
               className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -57,7 +58,7 @@ const PlayerPickerModal: React.FC<PlayerPickerModalProps> = ({
               value={clubFilter}
               onChange={(e) => setClubFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
             >
-              <option value="all">All Clubs</option>
+              <option value="all">所有球队</option>
               {CLUBS.map(c => <option key={c.id} value={c.id}>{c.shortName}</option>)}
             </select>
         </div>
@@ -65,7 +66,7 @@ const PlayerPickerModal: React.FC<PlayerPickerModalProps> = ({
         {/* List */}
         <div className="overflow-y-auto custom-scrollbar bg-slate-50 flex-1">
            {filteredPlayers.length === 0 ? (
-             <div className="p-8 text-center text-gray-400">No players found</div>
+             <div className="p-8 text-center text-gray-400">没有找到符合条件的球员</div>
            ) : (
              <ul className="divide-y divide-gray-200">
                {filteredPlayers.map(p => {
@@ -83,12 +84,12 @@ const PlayerPickerModal: React.FC<PlayerPickerModalProps> = ({
                          </div>
                          <div>
                             <div className="font-bold text-gray-800 text-sm">{p.webName}</div>
-                            <div className="text-xs text-gray-500">Points: {p.totalSeasonPoints}</div>
+                            <div className="text-xs text-gray-500">总分: {p.totalSeasonPoints}</div>
                          </div>
                       </div>
                       <div className="text-right">
                          <div className={`font-bold ${canAfford ? 'text-[#37003c]' : 'text-red-500'}`}>£{p.price.toFixed(1)}m</div>
-                         <div className="text-[10px] text-gray-400">Price</div>
+                         <div className="text-[10px] text-gray-400">价格</div>
                       </div>
                    </li>
                  );

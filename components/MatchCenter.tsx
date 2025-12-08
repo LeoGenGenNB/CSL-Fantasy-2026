@@ -12,8 +12,8 @@ const MatchCenter: React.FC<MatchCenterProps> = ({ matches, players }) => {
   return (
     <div className="space-y-4">
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-4">
-         <h2 className="font-bold text-slate-800 text-lg">Gameweek Fixtures</h2>
-         <p className="text-slate-500 text-sm">Live scores and updates</p>
+         <h2 className="font-bold text-slate-800 text-lg">本轮赛程 (Gameweek 1)</h2>
+         <p className="text-slate-500 text-sm">实时比分与赛况更新</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -46,7 +46,7 @@ const MatchCenter: React.FC<MatchCenterProps> = ({ matches, players }) => {
                       VS
                     </div>
                   )}
-                  <span className="text-[10px] text-slate-500 mt-1">{match.isFinished ? 'FT' : '19:30'}</span>
+                  <span className="text-[10px] text-slate-500 mt-1">{match.isFinished ? '完赛' : '19:30'}</span>
                 </div>
 
                 <div className="flex items-center gap-3 w-1/3 justify-end">
@@ -63,13 +63,13 @@ const MatchCenter: React.FC<MatchCenterProps> = ({ matches, players }) => {
                   <div className="text-right space-y-1">
                     {homeGoals.map((g, i) => {
                        const p = getPlayerById(g.playerId);
-                       return <div key={i} className="text-slate-600">{p?.webName} {g.minute}'</div>
+                       return <div key={i} className="text-slate-600">{p?.webName} {g.minute}' ⚽</div>
                     })}
                   </div>
                   <div className="text-left space-y-1">
                     {awayGoals.map((g, i) => {
                        const p = getPlayerById(g.playerId);
-                       return <div key={i} className="text-slate-600">{p?.webName} {g.minute}'</div>
+                       return <div key={i} className="text-slate-600">⚽ {g.minute}' {p?.webName}</div>
                     })}
                   </div>
                 </div>
@@ -81,7 +81,7 @@ const MatchCenter: React.FC<MatchCenterProps> = ({ matches, players }) => {
       
       {matches.length === 0 && (
           <div className="text-center py-10 text-slate-400">
-              No fixtures loaded.
+              暂无赛程数据
           </div>
       )}
     </div>
