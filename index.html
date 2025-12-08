@@ -5,27 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>中超 Fantasy 2026</title>
     
-    <!-- 1. Global Error Handler -->
+    <!-- Global Error Handler -->
     <script>
       window.onerror = function(message, source, lineno, colno, error) {
-        const root = document.getElementById('root');
-        if (root) {
-          root.innerHTML = `
-            <div style="padding: 20px; color: red; font-family: monospace; background: #fff0f0; border: 1px solid red; margin: 20px; border-radius: 8px;">
-              <h3 style="margin-top:0">⚠️ 程序启动错误</h3>
-              <p><strong>错误信息:</strong> ${message}</p>
-              <p><strong>位置:</strong> ${source}:${lineno}:${colno}</p>
-              <pre style="background:#eee; padding:10px; overflow:auto;">${error && error.stack ? error.stack : 'No stack trace'}</pre>
-              <p style="font-size:12px; color:#666;">如果看到此信息，说明某些 JavaScript 模块加载失败。</p>
-            </div>
-          `;
-        }
+        // Simple error logging, most errors will be caught by React ErrorBoundary
+        console.error("Global Error:", message, source, lineno, error);
       };
-
-      // 2. Process Polyfill
-      window.process = { env: { API_KEY: '' } };
     </script>
 
+    <!-- Tailwind CSS (CDN for simplicity) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -58,28 +46,23 @@
       .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
     </style>
-    
-    <!-- 3. Import Map using esm.sh for reliable dependency resolution -->
-    <script type="importmap">
+  <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@18.2.0,react-dom@18.2.0",
-    "react-markdown": "https://esm.sh/react-markdown@9.0.1?deps=react@18.2.0",
-    "@google/genai": "https://esm.sh/@google/genai@0.1.2",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6"
   }
 }
 </script>
-    <!-- Preload critical modules -->
-    <link rel="modulepreload" href="https://esm.sh/react@18.2.0">
-    <link rel="modulepreload" href="https://esm.sh/react-dom@18.2.0/client">
-  </head>
+</head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.js"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
