@@ -1,17 +1,14 @@
-
-import { GoogleGenAI } from "@google/genai";
 import { UserTeam, Player, Position } from "../types";
 import { getPlayerById, getClubById } from "./gameService";
 
+// Helper to safely get API key without crashing in browser
 const getAPIKey = () => {
-    // Safety check for process.env
     try {
-        if (typeof process !== 'undefined' && process.env) {
-            return process.env.API_KEY || '';
+        if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+            return process.env.API_KEY;
         }
-        // Fallback or polyfill check
-        if ((window as any).process?.env) {
-            return (window as any).process.env.API_KEY || '';
+        if ((window as any).process?.env?.API_KEY) {
+            return (window as any).process.env.API_KEY;
         }
     } catch (e) {
         return '';
@@ -22,6 +19,16 @@ const getAPIKey = () => {
 export const generateTeamAnalysis = async (team: UserTeam): Promise<string> => {
   const apiKey = getAPIKey();
   if (!apiKey) return "未配置 API Key，无法使用 AI 功能。";
+
+  // Dynamic import to prevent app crash if the SDK module fails to load on startup
+  let GoogleGenAI;
+  try {
+      const module = await import("@google/genai");
+      GoogleGenAI = module.GoogleGenAI;
+  } catch (error) {
+      console.error("Failed to load Google GenAI SDK:", error);
+      return "加载 AI 组件失败，请检查网络连接或浏览器兼容性。";
+  }
 
   const ai = new GoogleGenAI({ apiKey });
 

@@ -4,11 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>中超 Fantasy 2026</title>
+    
+    <!-- 1. Global Error Handler: Catch errors immediately to avoid white screen -->
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        const root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = `
+            <div style="padding: 20px; color: red; font-family: monospace; background: #fff0f0; border: 1px solid red; margin: 20px;">
+              <h3>⚠️ 启动错误 (Application Error)</h3>
+              <p><strong>Message:</strong> ${message}</p>
+              <p><strong>Source:</strong> ${source}:${lineno}:${colno}</p>
+              <pre>${error && error.stack ? error.stack : 'No stack trace'}</pre>
+            </div>
+          `;
+        }
+      };
+
+      // 2. Process Polyfill: Must run before any React code
+      window.process = { env: { API_KEY: '' } };
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Polyfill for process.env to prevent ReferenceError in browser
-      window.process = { env: { API_KEY: '' } };
-      
       tailwind.config = {
         theme: {
           extend: {
@@ -34,35 +52,25 @@
       }
     </script>
     <style>
-      /* Custom Scrollbar for Modal */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 8px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #c7c7c7;
-        border-radius: 4px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #a0a0a0;
-      }
+      .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^6.22.3"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+    {
+      "imports": {
+        "react/": "https://aistudiocdn.com/react@^19.2.1/",
+        "react": "https://aistudiocdn.com/react@^19.2.1",
+        "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+        "react-dom": "https://aistudiocdn.com/react-dom@^19.2.1",
+        "react-router-dom": "https://aistudiocdn.com/react-router-dom@^6.22.3"
+      }
+    }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
   </body>
